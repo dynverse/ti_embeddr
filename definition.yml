@@ -1,6 +1,6 @@
 id: embeddr
-docker_repository: dynverse/dynmethods:embeddr
-container_url: https://github.com/dynverse/dynmethods/tree/master/containers/embeddr
+docker_repository: dynverse/ti_embeddr
+container_url: https://github.com/dynverse/ti_embeddr
 name: Embeddr
 type: algorithm
 doi: '10.1101/027219'
