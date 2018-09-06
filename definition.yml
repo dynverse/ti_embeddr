@@ -1,5 +1,6 @@
 id: embeddr
 docker_repository: dynverse/ti_embeddr
+singularity_collection: 1545
 container_url: https://github.com/dynverse/ti_embeddr
 name: Embeddr
 type: algorithm
