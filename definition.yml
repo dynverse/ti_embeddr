@@ -3,7 +3,7 @@ docker_repository: dynverse/ti_embeddr
 singularity_collection: 1545
 container_url: https://github.com/dynverse/ti_embeddr
 name: Embeddr
-type: algorithm
+source: tool
 doi: '10.1101/027219'
 google_scholar_cluster_id: '5302171132481221018'
 platform: R
