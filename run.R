@@ -1,35 +1,38 @@
-library(jsonlite)
-library(readr)
-library(dplyr)
-library(purrr)
-requireNamespace("scaterlegacy")
-requireNamespace("embeddr")
+#!/usr/local/bin/Rscript
 
-#   ____________________________________________________________________________
-#   Load data                                                               ####
+task <- dyncli::main()
 
-data <- read_rds("/ti/input/data.rds")
-params <- jsonlite::read_json("/ti/input/params.json")
+# load libraries
+library(dyncli, warn.conflicts = FALSE)
+library(dynwrap, warn.conflicts = FALSE)
+library(dplyr, warn.conflicts = FALSE)
+library(purrr, warn.conflicts = FALSE)
 
-#' @examples
-#' data <- dyntoy::generate_dataset(id = "test", num_cells = 300, num_features = 300, model = "linear") %>% c(., .$prior_information)
-#' params <- yaml::read_yaml("containers/embeddr/definition.yml")$parameters %>%
-#'   {.[names(.) != "forbidden"]} %>%
-#'   map(~ .$default)
+library(parallel, warn.conflicts = FALSE)
+library(BiocGenerics, warn.conflicts = FALSE)
+library(Biobase, warn.conflicts = FALSE)
 
-#   ____________________________________________________________________________
-#   Infer trajectory                                                        ####
+library(scaterlegacy, warn.conflicts = FALSE)
+library(embeddr, warn.conflicts = FALSE)
 
-counts <- data$counts
-
-# calculate nn param
-nn <- max(round(log(nrow(counts)) * params$nn_pct), 9)
+#####################################
+###           LOAD DATA           ###
+#####################################
+expression <- task$expression
+params <- task$params
+priors <- task$priors
 
 # TIMING: done with preproc
-checkpoints <- list(method_afterpreproc = as.numeric(Sys.time()))
+timings <- list(method_afterpreproc = Sys.time())
+
+#####################################
+###        INFER TRAJECTORY       ###
+#####################################
+# calculate nn param
+nn <- max(round(log(nrow(expression)) * params$nn_pct), 9)
 
 # load data in scaterlegacy
-sce <- scaterlegacy::newSCESet(countData = t(counts))
+sce <- scaterlegacy::newSCESet(exprsData = t(expression))
 
 # run embeddr
 sce <- embeddr::embeddr(
@@ -53,40 +56,50 @@ sce <- embeddr::fit_pseudotime(
   smoother = params$smoother
 )
 
-# TIMING: done with method
-checkpoints$method_aftermethod <- as.numeric(Sys.time())
+# TIMING: done with trajectory inference
+timings$method_aftermethod <- Sys.time()
+
+#####################################
+###     SAVE OUTPUT TRAJECTORY    ###
+#####################################
 
 # construct milestone network
-pseudotime <- as(sce@phenoData, "data.frame")$pseudotime %>%
-  setNames(rownames(counts))
+pseudotime <-
+  as(sce@phenoData, "data.frame")$pseudotime %>%
+  setNames(rownames(expression))
 
 # creating extra output for visualisation purposes
-dimred_cells <- sce@reducedDimension
+dimred <- sce@reducedDimension
 
-traj <- as(sce@phenoData, "data.frame") %>%
+dimred_segment_points <-
+  as(sce@phenoData, "data.frame") %>%
   dplyr::arrange(pseudotime) %>%
   select(starts_with("trajectory_")) %>%
   as.matrix()
 
-dimred_trajectory_segments <- cbind(
-  traj[-nrow(traj), , drop = F],
-  traj[-1, , drop = F]
-)
-colnames(dimred_trajectory_segments) <- c(
-  paste0("from_comp_", seq_len(ncol(dimred_cells))),
-  paste0("to_comp_", seq_len(ncol(dimred_cells)))
-)
+dimred_segment_progressions <-
+  tibble(
+    from = "milestone_begin",
+    to = "milestone_end",
+    percentage = pseudotime %>% sort
+  )
 
-# return output
-model <- lst(
-  cell_ids = names(pseudotime),
-  pseudotime = pseudotime,
-  dimred = dimred_cells,
-  dimred_trajectory_segments = dimred_trajectory_segments,
-  timings = checkpoints
-)
+output <-
+  wrap_data(
+    cell_ids = rownames(expression)
+  ) %>%
+  add_linear_trajectory(
+    pseudotime = pseudotime,
+    do_scale_minmax = FALSE
+  ) %>%
+  add_dimred(
+    dimred = dimred,
+    dimred_milesones = dimred_segment_points[c(1, nrow(dimred_segment_points)), , drop = FALSE],
+    dimred_segment_points = dimred_segment_points,
+    dimred_segment_progressions = dimred_segment_progressions
+  ) %>%
+  add_timings(
+    timings = timings
+  )
 
-#   ____________________________________________________________________________
-#   Save output                                                             ####
-
-write_rds(model, "/ti/output/output.rds")
+dyncli::write_output(output, task$output)
