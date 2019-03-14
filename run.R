@@ -94,7 +94,7 @@ output <-
   ) %>%
   add_dimred(
     dimred = dimred,
-    dimred_milesones = dimred_segment_points[c(1, nrow(dimred_segment_points)), , drop = FALSE],
+    dimred_milestones = dimred_segment_points[c(1, nrow(dimred_segment_points)), , drop = FALSE],
     dimred_segment_points = dimred_segment_points,
     dimred_segment_progressions = dimred_segment_progressions
   ) %>%
