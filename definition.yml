@@ -21,7 +21,7 @@ container:
   docker: dynverse/ti_embeddr
 
 wrapper:
-  type: linear_trajector
+  type: linear_trajectory
   topology_inference: fixed
   trajectory_types: linear
   input_required: expression
