@@ -18,7 +18,7 @@ library(embeddr, warn.conflicts = FALSE)
 #####################################
 ###           LOAD DATA           ###
 #####################################
-expression <- task$expression
+expression <- as.matrix(task$expression)
 params <- task$params
 priors <- task$priors
 
