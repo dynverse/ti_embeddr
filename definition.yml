@@ -91,12 +91,11 @@ parameters:
     description: |-
       How to make the adjacency matrix symmetric. Note that slightly
       counterintuitively, node i having node j as a nearest neighbour doesn't guarantee node
-      j has node i. There are several ways to get round this:
-      \itemize{
-      \item \code{mean} If the above case occurs make the link weight 0.5 so the adjacency matrix becomes \eqn{0.5(A + A')}
-      \item \code{ceil} If the above case occurs set the link weight to 1 (ie take the ceiling of the mean case)
-      \item \code{floor} If the above case occurs set the link weight to 0 (ie take the floor of the mean case)
-      }
+      j has node i. There are several ways to get round this;
+      
+      * `mean` If the above case occurs make the link weight 0.5 so the adjacency matrix becomes $0.5(A + A')$
+      * `ceil` If the above case occurs set the link weight to 1 (ie take the ceiling of the mean case)
+      * `floor` If the above case occurs set the link weight to 0 (ie take the floor of the mean case)
   - id: measure_type
     type: character
     default: unorm
@@ -130,11 +129,7 @@ parameters:
       type: uniform
       lower: 0
       upper: 5
-    description: |-
-      a factor by which the curve can be extrapolated when
-      points are projected.  Default is 2 (times the last segment
-      length). The default is 0 for \code{smoother} equal to
-      \code{"periodic_lowess"}.
+    description: A factor by which the curve can be extrapolated when points are projected.  Default is 2 (times the last segment length). The default is 0 for `smoother` equal to `"periodic_lowess"`.
   - id: smoother
     type: character
     default: smooth.spline
@@ -143,10 +138,6 @@ parameters:
     - lowess
     - periodic.lowess
     description: |-
-      choice of smoother. The default is
-      \code{"smooth_spline"}, and other choices are \code{"lowess"} and
-      \code{"periodic_lowess"}. The latter allows one to fit closed curves.
-      Beware, you may want to use \code{
-      iter = 0} with \code{lowess()}.
+      Choice of smoother. The default is `"smooth_spline"`, and other choices are `"lowess"` and `"periodic_lowess"`. The latter allows one to fit closed curves. Beware, you may want to use `iter = 0` with `lowess()`.
 
 
