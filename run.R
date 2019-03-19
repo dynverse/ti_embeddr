@@ -19,7 +19,7 @@ library(embeddr, warn.conflicts = FALSE)
 ###           LOAD DATA           ###
 #####################################
 expression <- as.matrix(task$expression)
-params <- task$params
+parameters <- task$parameters
 priors <- task$priors
 
 # TIMING: done with preproc
@@ -29,7 +29,7 @@ timings <- list(method_afterpreproc = Sys.time())
 ###        INFER TRAJECTORY       ###
 #####################################
 # calculate nn param
-nn <- max(round(log(nrow(expression)) * params$nn_pct), 9)
+nn <- max(round(log(nrow(expression)) * parameters$nn_pct), 9)
 
 # load data in scaterlegacy
 sce <- scaterlegacy::newSCESet(exprsData = t(expression))
@@ -37,23 +37,23 @@ sce <- scaterlegacy::newSCESet(exprsData = t(expression))
 # run embeddr
 sce <- embeddr::embeddr(
   sce,
-  kernel = params$kernel,
-  metric = params$metric,
+  kernel = parameters$kernel,
+  metric = parameters$metric,
   nn = nn,
-  eps = params$eps,
-  t = params$t,
-  symmetrize = params$symmetrize,
-  measure_type = params$measure_type,
-  p = params$ndim
+  eps = parameters$eps,
+  t = parameters$t,
+  symmetrize = parameters$symmetrize,
+  measure_type = parameters$measure_type,
+  p = parameters$ndim
 )
 
 # fit pseudotime
 sce <- embeddr::fit_pseudotime(
   sce,
-  thresh = params$thresh,
-  maxit = params$maxit,
-  stretch = params$stretch,
-  smoother = params$smoother
+  thresh = parameters$thresh,
+  maxit = parameters$maxit,
+  stretch = parameters$stretch,
+  smoother = parameters$smoother
 )
 
 # TIMING: done with trajectory inference
