@@ -84,6 +84,9 @@ dimred_segment_progressions <-
     percentage = pseudotime %>% sort
   )
 
+dimred_milestones <- dimred_segment_points[c(1, nrow(dimred_segment_points)), , drop = FALSE]
+rownames(dimred_milestones) <- c("milestone_begin", "milestone_end")
+
 output <-
   wrap_data(
     cell_ids = rownames(expression)
@@ -94,7 +97,7 @@ output <-
   ) %>%
   add_dimred(
     dimred = dimred,
-    dimred_milestones = dimred_segment_points[c(1, nrow(dimred_segment_points)), , drop = FALSE],
+    dimred_milestones = dimred_milestones,
     dimred_segment_points = dimred_segment_points,
     dimred_segment_progressions = dimred_segment_progressions
   ) %>%
