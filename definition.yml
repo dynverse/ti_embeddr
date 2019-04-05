@@ -1,27 +1,42 @@
-id: embeddr
-docker_repository: dynverse/ti_embeddr
-singularity_collection: 1545
-container_url: https://github.com/dynverse/ti_embeddr
-name: Embeddr
-source: tool
-doi: '10.1101/027219'
-google_scholar_cluster_id: '5302171132481221018'
-platform: R
-trajectory_types:
-- linear
-topology_inference: fixed
-license: GPL-3
-preprint_date: '2015-09-18'
-code_url: https://github.com/kieranrcampbell/embeddr
+method:
+  id: embeddr
+  name: Embeddr
+  source: tool
+  platform: R
+  url: https://github.com/kieranrcampbell/embeddr
+  license: GPL-3
+  authors:
+  - given: Kieran
+    family: Campbell
+    email: kicampbell@bccrc.ca
+    github: kieranrcampbell
+
+manuscript:
+  doi: '10.1101/027219'
+  google_scholar_cluster_id: '5302171132481221018'
+  preprint_date: '2015-09-18'
+
+container:
+  url: https://github.com/dynverse/ti_embeddr
+  docker: dynverse/ti_embeddr
+
+wrapper:
+  type: linear_trajectory
+  topology_inference: fixed
+  trajectory_types: linear
+  input_required: expression
+
 parameters:
-  ndim:
+  - id: ndim
     type: integer
     default: 2
-    upper: 10
-    lower: 2
+    distribution:
+      type: uniform
+      lower: 2
+      upper: 10
     description: Dimension of the embedded space, default is 2
-  kernel:
-    type: discrete
+  - id: kernel
+    type: character
     default: nn
     values:
     - nn
@@ -31,8 +46,8 @@ parameters:
       The choice of kernel. 'nn' will give nearest neighbours, 'dist' gives minimum distance and
       'heat' gives a heat kernel. Discussed in detail in 'Laplacian Eigenmaps and Spectral Techniques for Embedding and Clustering',
       Belkin & Niyogi
-  metric:
-    type: discrete
+  - id: metric
+    type: character
     default: correlation
     values:
     - correlation
@@ -41,27 +56,33 @@ parameters:
     description: |-
       The metric with which to assess 'closeness' for nearest neighbour selection, one of
       'correlation' (pearson) or 'euclidean'. Default is 'correlation'.
-  nn_pct:
+  - id: nn_pct
     type: numeric
-    default: 0.0e+00
-    upper: 1.0
-    lower: -2.0
+    default: 0
+    distribution:
+      type: uniform
+      lower: -2
+      upper: 1
     description: The percentage of cells to use as tge number of nearest neighbours
       if kernel == 'nn'.
-  eps:
+  - id: eps
     type: numeric
-    default: 0.0e+00
-    upper: 5.0
-    lower: -5.0
+    default: 0
+    distribution:
+      type: uniform
+      lower: -5
+      upper: 5
     description: Maximum distance parameter if kernel == 'dist'
-  t:
+  - id: t
     type: numeric
-    default: 0.0e+00
-    upper: 5.0
-    lower: -5.0
-    description: '''time'' for heat kernel if kernel == ''heat'''
-  symmetrize:
-    type: discrete
+    default: 0
+    distribution:
+      type: uniform
+      upper: 5
+      lower: -5
+    description: '"time" for heat kernel if kernel == "heat"'
+  - id: symmetrize
+    type: character
     default: mean
     values:
     - mean
@@ -70,14 +91,13 @@ parameters:
     description: |-
       How to make the adjacency matrix symmetric. Note that slightly
       counterintuitively, node i having node j as a nearest neighbour doesn't guarantee node
-      j has node i. There are several ways to get round this:
-      \itemize{
-      \item \code{mean} If the above case occurs make the link weight 0.5 so the adjacency matrix becomes \eqn{0.5(A + A')}
-      \item \code{ceil} If the above case occurs set the link weight to 1 (ie take the ceiling of the mean case)
-      \item \code{floor} If the above case occurs set the link weight to 0 (ie take the floor of the mean case)
-      }
-  measure_type:
-    type: discrete
+      j has node i. There are several ways to get round this;
+      
+      * `mean` If the above case occurs make the link weight 0.5 so the adjacency matrix becomes $0.5(A + A')$
+      * `ceil` If the above case occurs set the link weight to 1 (ie take the ceiling of the mean case)
+      * `floor` If the above case occurs set the link weight to 0 (ie take the floor of the mean case)
+  - id: measure_type
+    type: character
     default: unorm
     values:
     - unorm
@@ -86,54 +106,38 @@ parameters:
       Type of laplacian eigenmap, which corresponds to the constraint on the eigenvalue problem. If
       type is 'unorm' (default), then the graph measure used is the identity matrix, while if type is 'norm' then the measure
       used is the degree matrix.
-  thresh:
+  - id: thresh
     type: numeric
     default: 0.001
-    upper: 100000.0
-    lower: 1.0e-05
-    distribution: expuniform
+    distribution:
+      type: expuniform
+      lower: 1.0e-05
+      upper: 100000
     description: convergence threshold on shortest distances to the curve.
-  maxit:
+  - id: maxit
     type: integer
     default: 10
-    upper: 50
-    lower: 0
+    distribution:
+      type: uniform
+      lower: 0
+      upper: 50
     description: maximum number of iterations.
-  stretch:
+  - id: stretch
     type: numeric
-    default: 2.0
-    upper: 5.0
-    lower: 0.0e+00
-    description: |-
-      a factor by which the curve can be extrapolated when
-      points are projected.  Default is 2 (times the last segment
-      length). The default is 0 for \code{smoother} equal to
-      \code{"periodic_lowess"}.
-  smoother:
-    type: discrete
+    default: 2
+    distribution:
+      type: uniform
+      lower: 0
+      upper: 5
+    description: A factor by which the curve can be extrapolated when points are projected.  Default is 2 (times the last segment length). The default is 0 for `smoother` equal to `"periodic_lowess"`.
+  - id: smoother
+    type: character
     default: smooth.spline
     values:
     - smooth.spline
     - lowess
     - periodic.lowess
     description: |-
-      choice of smoother. The default is
-      \code{"smooth_spline"}, and other choices are \code{"lowess"} and
-      \code{"periodic_lowess"}. The latter allows one to fit closed curves.
-      Beware, you may want to use \code{
-      iter = 0} with \code{lowess()}.
-input:
-  format: rds
-  required: counts
-output:
-  format: rds
-  outputs:
-  - linear_trajectory
-  - dimred
-  - timings
-wrapper_type: linear_trajectory
-authors:
-- given: Kieran
-  family: Campbell
-  email: kicampbell@bccrc.ca
-  github: kieranrcampbell
+      Choice of smoother. The default is `"smooth_spline"`, and other choices are `"lowess"` and `"periodic_lowess"`. The latter allows one to fit closed curves. Beware, you may want to use `iter = 0` with `lowess()`.
+
+

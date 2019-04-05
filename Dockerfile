@@ -1,10 +1,11 @@
-FROM dynverse/dynwrap:bioc
+FROM dynverse/dynwrapr:v0.1.0
+
+ARG GITHUB_PAT
 
 RUN R -e 'devtools::install_github("dynverse/scaterlegacy")'
+
 RUN R -e 'devtools::install_github("dynverse/embeddr")'
 
-LABEL version 0.1.4
+COPY definition.yml run.R example.sh /code/
 
-ADD . /code
-
-ENTRYPOINT Rscript /code/run.R
+ENTRYPOINT ["/code/run.R"]
